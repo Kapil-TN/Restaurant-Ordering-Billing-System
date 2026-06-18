@@ -17,6 +17,9 @@ from werkzeug.security import (
     check_password_hash
 )
 
+from app.utils.validators import require_fields
+from sqlalchemy.exc import IntegrityError
+
 auth_bp = Blueprint(
     "auth",
     __name__
@@ -26,7 +29,24 @@ auth_bp = Blueprint(
 @auth_bp.post("/register")
 def register():
 
-    data = request.json
+    if not request.is_json:
+        return {
+            "error":"json required"
+        },400
+
+    data = request.get_json()
+
+    if not require_fields(
+        data,
+        [
+            "name",
+            "email",
+            "password"
+        ]
+    ):
+        return {
+            "error":"invalid input"
+        },400
 
     user = User(
         name=data["name"],
@@ -34,9 +54,14 @@ def register():
         password=generate_password_hash(data["password"])
     )
 
-    db.session.add(user)
-
-    db.session.commit()
+    try:
+        db.session.add(user)
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        return {
+            "error":"email exists"
+        },409
 
     return {
         "message":"created"
@@ -46,7 +71,23 @@ def register():
 @auth_bp.post("/login")
 def login():
 
-    data = request.json
+    if not request.is_json:
+        return {
+            "error":"json required"
+        },400
+
+    data = request.get_json()
+
+    if not require_fields(
+        data,
+        [
+            "email",
+            "password"
+        ]
+    ):
+        return {
+            "error":"invalid input"
+        },400
 
     user = User.query.filter_by(
         email=data["email"]
@@ -80,7 +121,15 @@ def profile():
 
     uid = get_jwt_identity()
 
-    user = User.query.get(int(uid))
+    user = db.session.get(
+        User,
+        int(uid)
+    )
+
+    if not user:
+        return {
+            "error":"user not found"
+        },401
 
     return {
         "id": user.id,

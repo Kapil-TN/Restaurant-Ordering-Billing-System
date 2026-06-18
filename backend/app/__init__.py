@@ -1,31 +1,28 @@
-import os
 from flask import Flask
-from .extensions import db, migrate
-from flask_jwt_extended import JWTManager
-from dotenv import load_dotenv
-
-# Load environment variables from .env
-load_dotenv()
-
-jwt = JWTManager()
+from flask_cors import CORS
+from .extensions import db, migrate, jwt
+from .config import Config
 
 
 def create_app():
 
     app = Flask(__name__)
 
-    app.config["SQLALCHEMY_DATABASE_URI"] = \
-        os.environ.get("DATABASE_URL") or "sqlite:///restaurant.db"
+    # Load configuration from Config object
+    app.config.from_object(Config)
 
-    app.config["SECRET_KEY"] = \
-        os.environ.get("SECRET_KEY") or "dev"
-
-    app.config["JWT_SECRET_KEY"] = \
-        os.environ.get("JWT_SECRET_KEY") or "jwt-secret"
-
+    # Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
+
+    # Enable CORS for the frontend port
+    CORS(
+        app,
+        origins=[
+            "http://localhost:5173"
+        ]
+    )
 
     from .models.user import User
 

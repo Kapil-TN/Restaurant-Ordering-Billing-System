@@ -1,3 +1,4 @@
+from datetime import datetime
 from ..extensions import db
 
 
@@ -24,4 +25,15 @@ class User(db.Model):
     role = db.Column(
         db.String(20),
         default="customer"
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    updated_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
     )
