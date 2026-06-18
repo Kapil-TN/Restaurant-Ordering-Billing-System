@@ -38,7 +38,7 @@ pip install -r requirements.txt
 ### 4. Run Database Migrations
 Apply the existing database schema migration scripts:
 ```bash
-flask --app run db upgrade
+flask --app run.py db upgrade
 ```
 
 ### 5. Start the Backend Development Server
@@ -48,7 +48,7 @@ Run the Flask application:
 python run.py
 
 # Option 2: Run via Flask CLI
-flask --app run run
+flask --app run.py run
 ```
 The server will start at `http://127.0.0.1:5000/`.
 
@@ -68,3 +68,105 @@ All development is structured around the `develop` branch.
   git pull
   git checkout -b feature/your-module-name
   ```
+
+---
+
+## Branch Workflow
+
+Repository flow:
+
+main → stable / demo-ready branch
+
+develop → integration branch
+
+feature/* → individual work branches
+
+Example:
+
+```bash
+git checkout develop
+git pull
+
+git checkout -b feature/menu
+```
+
+After completing work:
+
+```bash
+git push origin feature/menu
+```
+
+Open Pull Request:
+
+```plaintext
+feature/menu → develop
+```
+
+---
+
+## Team Ownership
+
+Member 1
+- Authentication
+- Config
+- Database migrations
+- Backend integration
+
+Member 2
+- Menu
+- Table management
+
+Member 3
+- Orders
+- Billing
+
+Member 4
+- Dashboard
+- Analytics
+
+---
+
+## Integration Rules
+
+Before opening PR:
+
+```bash
+git checkout develop
+git pull
+```
+
+Requirements:
+- Work only inside assigned module
+- Do not modify auth routes unless discussed
+- Do not modify config.py unless discussed
+- Avoid editing existing migrations
+- Pull latest develop before merging
+
+---
+
+## API Contract
+
+Authentication endpoints are documented in:
+
+```plaintext
+docs/api-contract.md
+```
+
+If API behavior changes:
+
+1. Update api-contract.md
+2. Mention API changes in PR
+
+---
+
+## Verification Checklist
+
+Before submitting Pull Request:
+
+```plaintext
+[ ] Backend starts successfully
+[ ] Database migration succeeds
+[ ] Tests pass
+[ ] No merge conflicts
+[ ] API contract updated
+```
