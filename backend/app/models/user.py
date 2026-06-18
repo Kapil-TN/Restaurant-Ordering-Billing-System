@@ -22,5 +22,6 @@ class User(db.Model):
     )
 
     role = db.Column(
-        db.String(20)
+        db.String(20),
+        default="customer"
     )
