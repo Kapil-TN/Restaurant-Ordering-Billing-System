@@ -7,7 +7,14 @@ from app.models.user import User
 from app.extensions import db
 
 from flask_jwt_extended import (
-    create_access_token
+    create_access_token,
+    jwt_required,
+    get_jwt_identity
+)
+
+from werkzeug.security import (
+    generate_password_hash,
+    check_password_hash
 )
 
 auth_bp = Blueprint(
@@ -24,7 +31,7 @@ def register():
     user = User(
         name=data["name"],
         email=data["email"],
-        password=data["password"]
+        password=generate_password_hash(data["password"])
     )
 
     db.session.add(user)
@@ -45,32 +52,38 @@ def login():
         email=data["email"]
     ).first()
 
-    # Note: In a real-world app we would hash/verify the password, 
-    # but since the prompt doesn't ask us to do password hashing here (it compares or grabs direct password),
-    # and says password=data["password"] and doesn't specify check_password_hash,
-    # let's write it exactly as the prompt requires.
-    # Wait, the prompt says:
-    # "if not user: return {"message":"invalid"}, 401"
-    # But wait, what if the password doesn't match?
-    # Wait, the prompt's code for login is:
-    # user = User.query.filter_by(email=data["email"]).first()
-    # if not user:
-    #     return {"message":"invalid"}, 401
-    # token = create_access_token(identity=user.id)
-    # return {"token":token}
-    # Wait, does the prompt say to check the password? No, the code given is:
-    # user = User.query.filter_by(email=data["email"]).first()
-    # if not user: return {"message":"invalid"},401
-    # Let's write it exactly as requested so we pass the tests. We'll verify this code matches exactly.
     if not user:
         return {
             "message":"invalid"
         },401
 
+    if not check_password_hash(
+        user.password,
+        data["password"]
+    ):
+        return {
+            "message":"invalid"
+        },401
+
     token = create_access_token(
-        identity=user.id
+        identity=str(user.id)
     )
 
     return {
         "token":token
+    }
+
+
+@auth_bp.get("/profile")
+@jwt_required()
+def profile():
+
+    uid = get_jwt_identity()
+
+    user = User.query.get(int(uid))
+
+    return {
+        "id": user.id,
+        "name": user.name,
+        "role": user.role
     }
