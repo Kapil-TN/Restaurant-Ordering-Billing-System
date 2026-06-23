@@ -21,8 +21,8 @@ class MenuItem(db.Model):
     )
 
     price = db.Column(
-        db.Float,
-        nullable=False
+    db.Numeric(10, 2),
+    nullable=False
     )
 
     is_available = db.Column(
