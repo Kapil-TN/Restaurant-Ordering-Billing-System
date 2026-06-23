@@ -36,4 +36,10 @@ def create_app():
         url_prefix="/auth"
     )
 
+    from .routes.category import category_bp
+    app.register_blueprint(
+        category_bp,
+        url_prefix="/categories"
+    )
+
     return app
