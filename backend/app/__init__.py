@@ -25,6 +25,10 @@ def create_app():
     )
 
     from .models.user import User
+    from .models.category import Category
+    from .models.menu_item import MenuItem
+    from .models.restaurant_table import RestaurantTable
+
 
     from .routes.auth import auth_bp
     app.register_blueprint(
