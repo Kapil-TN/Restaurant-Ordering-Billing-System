@@ -42,4 +42,10 @@ def create_app():
         url_prefix="/categories"
     )
 
+    from .routes.menu import menu_bp
+    app.register_blueprint(
+        menu_bp,
+        url_prefix="/menu"
+    )
+
     return app
