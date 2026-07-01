@@ -48,4 +48,10 @@ def create_app():
         url_prefix="/menu"
     )
 
+    from .routes.table import table_bp
+    app.register_blueprint(
+        table_bp,
+        url_prefix="/tables"
+    )
+
     return app
